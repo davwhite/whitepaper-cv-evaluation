@@ -1,0 +1,7 @@
+langchain
+langchain-community
+openai
+serpapi
+python-dotenv
+transformers
+torch
