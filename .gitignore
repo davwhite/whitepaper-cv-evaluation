@@ -1,0 +1,25 @@
+# custom excludes
+data/
+scratch/
+files.txt
+bootstrap/sealed-secrets-secret.yaml
+components/operators/**/charts/
+dictionary.dic
+*.log
+
+# swap files
+*~
+.*~
+*.swp
+.*.swp
+*.swo
+tmp
+
+# bfg - because we never commit large data or passwords to git
+..bfg-report/
+
+# Environments
+.env
+.venv
+env/
+venv/
