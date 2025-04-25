@@ -1,28 +1,46 @@
 import os
+import re
+import requests
 from dotenv import load_dotenv
-from langchain.agents import Tool, initialize_agent
-from langchain.agents.agent_types import AgentType
-from langchain_community.tools.serpapi.tool import SerpAPIWrapper
-from langchain.llms import OpenAI
 
 load_dotenv()
 
-llm = OpenAI(temperature=0.3, openai_api_key=os.getenv("OPENAI_API_KEY"))
+def extract_price(text):
+    match = re.search(r"\$(\d{1,3}(?:,\d{3})*)", text)
+    if match:
+        return int(match.group(1).replace(",", ""))
+    return None
 
-search = SerpAPIWrapper(serpapi_api_key=os.getenv("SERPAPI_API_KEY"))
+def query_cars(keywords="used electric car", location="Maryland"):
+    params = {
+        "engine": "google",
+        "q": f"{keywords} for sale in {location}",
+        "api_key": os.getenv("SERPAPI_API_KEY"),
+    }
+    response = requests.get("https://serpapi.com/search", params=params)
+    results = response.json()
+    listings = results.get("organic_results", [])
+    return listings
 
-tools = [
-    Tool(
-        name="Web Search",
-        func=search.run,
-        description="Useful for finding up-to-date information about anything, especially product listings like cars."
-    )
-]
+def decide_action(cars, budget=20000):
+    suitable = []
+    for car in cars:
+        title = car.get("title", "")
+        price = extract_price(title)
+        if price and price <= budget and "electric" in title.lower():
+            suitable.append((title, price))
 
-agent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True)
+    if suitable:
+        print("\nRecommended cars:")
+        for title, price in suitable:
+            print(f"- {title} (${price})")
+        print("\n✅ ACTION: Recommend purchase.")
+    else:
+        print("\nNo suitable electric cars under budget found.")
+        print("⏳ ACTION: Wait or expand budget.")
 
 if __name__ == "__main__":
-    result = agent.run("How many used electric cars under $25,000 are for sale in Maryland?")
-    print("\n--- Summary ---")
-    print(result)
+    print("🔍 Searching for used electric cars...\n")
+    listings = query_cars()
+    decide_action(listings)
 

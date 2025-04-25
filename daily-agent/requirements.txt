@@ -1,7 +1,3 @@
-langchain
-langchain-community
-openai
-serpapi
+requests
 python-dotenv
-transformers
-torch
+
