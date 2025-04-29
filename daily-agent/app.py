@@ -24,14 +24,15 @@ def query_cars(keywords="used electric car", location="Maryland"):
     for i, listing in enumerate(listings):
         title = listing.get("title", "No title")
         link = listing.get("link", "No link")
-        print(f"{i + 1}. {title} - {link}")
+        price = listing.get("price", 1000)
+        print(f"{i + 1}. {title} - {link}, Price: {price}")
     return listings
 
 def decide_action(cars, budget=10000):
     suitable = []
     for car in cars:
         title = car.get("title", "")
-        price = extract_price(title)
+        price = car.get("price", "")
         if price and price <= budget and "electric" in title.lower():
             suitable.append((title, price))
 
